@@ -571,23 +571,23 @@
                         <div class="form-group">
                             <label for="currentPoints">当前竞逐点</label>
                             <div class="input-wrapper">
-                                <input type="number" id="currentPoints" v-model="currentPoints" placeholder="请输入当前竞逐点" inputmode="numeric">
+                                <input type="number" id="currentPoints" v-model="currentPoints" placeholder="请输入当前竞逐点" inputmode="numeric" step="500">
                             </div>
                         </div>
                         
-                        <div class="form-group">
+                        <!-- <div class="form-group">
                             <label for="conversionRate">竞逐点转化率 (%)</label>
                             <div class="input-wrapper">
                                 <input type="number" id="conversionRate" v-model="conversionRate" placeholder="输入转化率" inputmode="decimal">
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     
-                    <div class="checkbox-group">
+                    <!-- <div class="checkbox-group">
                         <input type="checkbox" id="screenshot" v-model="screenshot">
                         <span class="checkbox-custom"></span>
                         <label for="screenshot">计算完成后自动截图保存</label>
-                    </div>
+                    </div> -->
                     
                     <div class="btn-group">
                         <button class="btn-calculate" @click="calculate">
@@ -605,9 +605,9 @@
                     
                     <div id="resultCard" :class="{'highlighted': isHighlighted}">
                         <div v-if="result !== null">
-                            <div class="result-label">所需客单价</div>
+                            <div class="result-label">此页面截图后与主播沟通更顺畅哦</div>
                             <div class="result-value">¥{{ result.toFixed(2) }}</div>
-                            <div class="result-label">达到目标所需金额</div>
+                            <!-- <div class="result-label">达到目标所需金额</div> -->
                             
                             <div class="calculation-details">
                                 <div class="detail-item">
@@ -618,14 +618,7 @@
                                     <span class="detail-label">指定位置：</span>
                                     <span class="detail-value">
                                         {{ positions[position].name }}
-                                        <span :class="'position-' + positions[position].class">{{ positions[position].name }}</span>
-                                    </span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">目标竞逐点：</span>
-                                    <span class="detail-value">
-                                        {{ getTargetLabel(targetPoints) }}
-                                        <span v-if="targetPoints === 4000" class="screenshot-indicator">打满</span>
+                                        <!-- <span :class="'position-' + positions[position].class">{{ positions[position].name }}</span> -->
                                     </span>
                                 </div>
                                 <div class="detail-item">
@@ -633,10 +626,21 @@
                                     <span class="detail-value">{{ (targetPoints - currentPoints).toFixed(0) }}点</span>
                                 </div>
                                 <div class="detail-item">
-                                    <span class="detail-label">转化率：</span>
-                                    <span class="detail-value">{{ conversionRate }}%</span>
+                                    <span class="detail-label">目标竞逐点：</span>
+                                    <span class="detail-value">
+                                        {{ getTargetLabel(targetPoints) }}
+                                        <!-- <span v-if="targetPoints === 4000" class="screenshot-indicator">打满</span> -->
+                                    </span>
                                 </div>
                                 <div class="detail-item">
+                                    <span class="detail-label">当前竞逐点：</span>
+                                    <span class="detail-value"> {{currentPoints === undefined || currentPoints === '' ? 0 : currentPoints.toFixed(0) }}点</span>
+                                </div>
+                                <!-- <div class="detail-item">
+                                    <span class="detail-label">转化率：</span>
+                                    <span class="detail-value">{{ conversionRate }}%</span>
+                                </div> -->
+                                <!-- <div class="detail-item">
                                     <span class="detail-label">截图设置：</span>
                                     <span class="detail-value">
                                         {{ screenshot ? '已启用' : '未启用' }}
@@ -647,7 +651,7 @@
                                             <i class="fas fa-ban"></i> 未启用
                                         </span>
                                     </span>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         
@@ -663,11 +667,9 @@
                         <ul>
                             <li><strong>当前等级</strong> - 选择您的当前段位（青铜、白银、黄金等）</li>
                             <li><strong>等级段位</strong> - 选择您的具体段位（1到5级）</li>
-                            <li><strong>指定位置</strong> - 选择您擅长的位置（坦克、C位、奶妈或任意）</li>
-                            <li><strong>目标竞逐点</strong> - 选择您的目标点数，4000点为"打满"状态</li>
+                            <li><strong>指定位置</strong> - 选择您是否需要指定位置（坦克、C位、奶妈或任意）</li>
+                            <li><strong>目标竞逐点</strong> - 选择您的目标点数，6000点为"打满"状态</li>
                             <li><strong>当前竞逐点</strong> - 输入您当前的竞逐点数值</li>
-                            <li><strong>转化率</strong> - 设置您的竞逐点转化率（默认为30%）</li>
-                            <li><strong>自动截图</strong> - 勾选此选项将在计算完成后自动截图保存结果</li>
                             <li>点击<strong>计算客单价</strong>按钮获取计算结果</li>
                             <li>如需重新开始，点击<strong>重置</strong>按钮清除所有输入</li>
                         </ul>
@@ -678,7 +680,7 @@
             <p class="mobile-tip">提示：计算结果后将自动滚动到结果区域</p>
             
             <footer>
-                <p>© 2023 竞逐点计算器 | 本工具仅用于计算参考 | 部署于Gitee Pages</p>
+                <p>© 2025 竞逐点计算器 | 本工具仅用于计算参考</p>
             </footer>
         </div>
     </div>
@@ -689,8 +691,10 @@
         createApp({
             setup() {
                 // 等级数据
-                const rankLevels = ref(["青铜", "白银", "黄金", "白金", "钻石", "大师"]);
+                const rankLevels = ref(["青铜", "白银", "黄金", "白金", "钻石"]);
                 const tiers = ref([1, 2, 3, 4, 5]);
+
+                const priceMap = {"0":35,"1":35,"2":35,"3":45,"4":60};
                 
                 // 位置数据
                 const positions = ref([
@@ -702,7 +706,9 @@
                 
                 // 目标竞逐点选项
                 const targetPointsOptions = ref([
-                    { label: "打满 (4000点)", value: 4000 },
+                    { label: "打满(6000点)", value: 6000 },
+                    { label: "5000点", value: 5000 },
+                    { label: "4000点", value: 4000 },
                     { label: "3000点", value: 3000 },
                     { label: "2000点", value: 2000 },
                     { label: "1000点", value: 1000 }
@@ -710,17 +716,28 @@
                 
                 // 表单数据
                 const currentRank = ref(0);
-                const currentTier = ref(3);
+                const currentTier = ref(1);
                 const position = ref(0);
                 const currentPoints = ref(0);
-                const targetPoints = ref(4000);
-                const conversionRate = ref(30);
-                const screenshot = ref(true);
+                const targetPoints = ref(6000);
+                // const conversionRate = ref(30);
+                // const screenshot = ref(true);
                 
                 // 计算结果
                 const result = ref(null);
                 const isHighlighted = ref(false);
                 const isLoading = ref(false);
+
+                const getSinglePrice = (rankLevel,tier) => {
+   
+                    if (tier === 1){
+                        rankLevel += 1
+                    }
+                    if (priceMap[rankLevel]){
+                        return priceMap[rankLevel]
+                    }
+                    return 60;
+                };
                 
                 // 获取目标竞逐点标签
                 const getTargetLabel = (value) => {
@@ -747,57 +764,54 @@
                 
                 // 计算客单价
                 const calculate = () => {
+                    if (currentPoints.value === undefined || currentPoints.value === ''){
+                        currentPoints.value = 0;
+                    }
                     isLoading.value = true;
                     
                     // 模拟计算延迟
                     setTimeout(() => {
                         const pointsDiff = targetPoints.value - currentPoints.value;
-                        
+                        if(currentPoints.value < 0){
+                            alert("当前竞逐点不能为负数");
+                            isLoading.value = false;
+                            return;
+                        }
                         if (pointsDiff <= 0) {
                             alert("目标竞逐点必须大于当前竞逐点");
                             isLoading.value = false;
                             return;
                         }
                         
-                        if (conversionRate.value <= 0 || conversionRate.value > 100) {
-                            alert("转化率必须在1%到100%之间");
-                            isLoading.value = false;
-                            return;
-                        }
-                        
                         // 计算公式：所需金额 = (竞逐点差值 / 转化率) * 100
-                        const requiredAmount = (pointsDiff / (conversionRate.value / 100));
+                        const singlePrice = getSinglePrice(currentRank.value,currentTier.value)
+                        const requiredAmount = Math.round((pointsDiff / 1000) * singlePrice);
                         
                         // 根据位置应用系数
-                        const positionCoefficient = position.value === 0 ? 1 : 1.1; // 非任意位置增加10%难度
+                        // const positionCoefficient = position.value === 0 ? 1 : 1.1; // 非任意位置增加10%难度
                         
-                        result.value = requiredAmount * positionCoefficient;
+                        result.value = requiredAmount;
                         
                         // 移动端键盘收起后再滚动
                         setTimeout(() => {
                             scrollToResult();
                         }, 300);
                         
-                        // 模拟截图功能
-                        if (screenshot.value) {
-                            setTimeout(() => {
-                                alert("截图已保存到相册！");
-                            }, 1000);
-                        }
-                        
                         isLoading.value = false;
-                    }, 800);
+                    }, 500);
                 };
+
+
                 
                 // 重置表单
                 const reset = () => {
                     currentRank.value = 0;
-                    currentTier.value = 3;
+                    currentTier.value = 1;
                     position.value = 0;
                     currentPoints.value = 0;
-                    targetPoints.value = 4000;
-                    conversionRate.value = 30;
-                    screenshot.value = true;
+                    targetPoints.value = 6000;
+                    // conversionRate.value = 30;
+                    // screenshot.value = true;
                     result.value = null;
                 };
                 
@@ -811,8 +825,8 @@
                     position,
                     currentPoints,
                     targetPoints,
-                    conversionRate,
-                    screenshot,
+                    // conversionRate,
+                    // screenshot,
                     result,
                     isHighlighted,
                     isLoading,
