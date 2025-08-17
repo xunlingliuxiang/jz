@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>竞逐点计算器</title>
+    <!-- 使用生产环境的Vue库 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 0 12px;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        header h1 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding-top: 10px;
+        }
+        
+        header p {
+            color: rgba(255,255,255,0.85);
+            font-size: 1rem;
+            margin: 0 auto;
+            max-width: 95%;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .section {
+            padding: 20px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            color: #1a2a6c;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #1a2a6c;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 0.95rem;
+        }
+        
+        .select-wrapper, .input-wrapper {
+            position: relative;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+            appearance: none;
+            color: #333;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            box-shadow: 0 0 0 3px rgba(26, 42, 108, 0.2);
+        }
+        
+        .select-wrapper::after {
+            content: "▼";
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            font-size: 0.8rem;
+            pointer-events: none;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            padding: 10px 0;
+            position: relative;
+        }
+        
+        .checkbox-group input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .checkbox-custom {
+            position: relative;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            margin-right: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .checkbox-group input:checked + .checkbox-custom {
+            background: #1a2a6c;
+            border-color: #1a2a6c;
+        }
+        
+        .checkbox-group input:checked + .checkbox-custom::after {
+            content: "";
+            position: absolute;
+            left: 7px;
+            top: 3px;
+            width: 8px;
+            height: 13px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+        
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: 600;
+            color: #444;
+            cursor: pointer;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-calculate {
+            background: linear-gradient(135deg, #1a2a6c, #4a569d);
+            color: white;
+            box-shadow: 0 4px 12px rgba(26, 42, 108, 0.3);
+        }
+        
+        .btn-calculate:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 6px rgba(26, 42, 108, 0.3);
+        }
+        
+        .btn-reset {
+            background: #f0f0f0;
+            color: #555;
+        }
+        
+        .btn-reset:active {
+            background: #e0e0e0;
+            transform: translateY(2px);
+        }
+        
+        .result-section {
+            position: relative;
+        }
+        
+        .result-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #1a2a6c, transparent);
+            border-radius: 2px;
+        }
+        
+        #resultCard {
+            background: linear-gradient(135deg, #1a2a6c, #4a569d);
+            border-radius: 15px;
+            padding: 24px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            margin-top: 15px;
+            transition: all 0.5s;
+        }
+        
+        .highlighted {
+            animation: highlight 1.5s ease;
+            box-shadow: 0 0 0 5px rgba(255, 215, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .result-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 15px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            color: #ffd700;
+            animation: pulse 2s infinite;
+            line-height: 1.1;
+        }
+        
+        .result-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        
+        .calculation-details {
+            margin-top: 22px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.95rem;
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #ffd700;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            border-left: 4px solid #1a2a6c;
+        }
+        
+        .instructions h3 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            color: #444;
+            line-height: 1.5;
+        }
+        
+        .instructions li strong {
+            color: #1a2a6c;
+        }
+        
+        footer {
+            text-align: center;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.85rem;
+            padding: 0 15px 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .mobile-tip {
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+            margin-top: 10px;
+            padding: 0 15px;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 0 15px rgba(255, 215, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
+        }
+        
+        /* 小屏幕设备优化 */
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .result-value {
+                font-size: 2.4rem;
+            }
+        }
+        
+        /* 防止iPhone输入框缩放 */
+        @media (max-width: 480px) {
+            select, input, button {
+                font-size: 16px;
+            }
+        }
+        
+        .position-label {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        .position-tank {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .position-dps {
+            background-color: #F44336;
+            color: white;
+        }
+        
+        .position-healer {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .position-any {
+            background-color: #9C27B0;
+            color: white;
+        }
+        
+        .screenshot-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background-color: #FF9800;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        .screenshot-indicator i {
+            margin-right: 5px;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #1a2a6c;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 加载动画 -->
+        <div class="loading-overlay" :class="{active: isLoading}">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="container">
+            <header>
+                <h1><i class="fas fa-calculator"></i> 竞逐点计算器</h1>
+                <p>根据您的段位、位置和目标，计算所需的客单价</p>
+            </header>
+            
+            <div class="card">
+                <!-- 输入区域 -->
+                <div class="section input-section">
+                    <h2 class="section-title"><i class="fas fa-edit"></i> 输入信息</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentRank">当前等级</label>
+                            <div class="select-wrapper">
+                                <select id="currentRank" v-model="currentRank">
+                                    <option v-for="(rank, index) in rankLevels" :value="index" :key="'rank-'+index">
+                                        {{ rank }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="currentTier">等级段位</label>
+                            <div class="select-wrapper">
+                                <select id="currentTier" v-model="currentTier">
+                                    <option v-for="tier in tiers" :value="tier" :key="'tier-'+tier">
+                                        {{ tier }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="position">指定位置</label>
+                            <div class="select-wrapper">
+                                <select id="position" v-model="position">
+                                    <option v-for="(pos, index) in positions" :value="index" :key="'pos-'+index">
+                                        {{ pos.name }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="targetPoints">目标竞逐点</label>
+                            <div class="select-wrapper">
+                                <select id="targetPoints" v-model="targetPoints">
+                                    <option v-for="point in targetPointsOptions" :value="point.value" :key="point.value">
+                                        {{ point.label }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentPoints">当前竞逐点</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="currentPoints" v-model="currentPoints" placeholder="请输入当前竞逐点" inputmode="numeric">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="conversionRate">竞逐点转化率 (%)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="conversionRate" v-model="conversionRate" placeholder="输入转化率" inputmode="decimal">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="screenshot" v-model="screenshot">
+                        <span class="checkbox-custom"></span>
+                        <label for="screenshot">计算完成后自动截图保存</label>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button class="btn-calculate" @click="calculate">
+                            <i class="fas fa-calculator"></i> 计算客单价
+                        </button>
+                        <button class="btn-reset" @click="reset">
+                            <i class="fas fa-redo"></i> 重置
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 结果区域 -->
+                <div class="section result-section">
+                    <h2 class="section-title"><i class="fas fa-chart-line"></i> 计算结果</h2>
+                    
+                    <div id="resultCard" :class="{'highlighted': isHighlighted}">
+                        <div v-if="result !== null">
+                            <div class="result-label">所需客单价</div>
+                            <div class="result-value">¥{{ result.toFixed(2) }}</div>
+                            <div class="result-label">达到目标所需金额</div>
+                            
+                            <div class="calculation-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">当前等级：</span>
+                                    <span class="detail-value">{{ rankLevels[currentRank] }} {{ currentTier }}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">指定位置：</span>
+                                    <span class="detail-value">
+                                        {{ positions[position].name }}
+                                        <span :class="'position-' + positions[position].class">{{ positions[position].name }}</span>
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">目标竞逐点：</span>
+                                    <span class="detail-value">
+                                        {{ getTargetLabel(targetPoints) }}
+                                        <span v-if="targetPoints === 4000" class="screenshot-indicator">打满</span>
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">竞逐点差值：</span>
+                                    <span class="detail-value">{{ (targetPoints - currentPoints).toFixed(0) }}点</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">转化率：</span>
+                                    <span class="detail-value">{{ conversionRate }}%</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">截图设置：</span>
+                                    <span class="detail-value">
+                                        {{ screenshot ? '已启用' : '未启用' }}
+                                        <span v-if="screenshot" class="screenshot-indicator">
+                                            <i class="fas fa-camera"></i> 已启用
+                                        </span>
+                                        <span v-else class="screenshot-indicator" style="background-color: #9e9e9e;">
+                                            <i class="fas fa-ban"></i> 未启用
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div v-else>
+                            <div class="result-label">等待计算</div>
+                            <div class="result-value"><i class="fas fa-calculator"></i></div>
+                            <div class="result-label">输入数据后点击计算按钮</div>
+                        </div>
+                    </div>
+                    
+                    <div class="instructions">
+                        <h3><i class="fas fa-info-circle"></i> 使用说明</h3>
+                        <ul>
+                            <li><strong>当前等级</strong> - 选择您的当前段位（青铜、白银、黄金等）</li>
+                            <li><strong>等级段位</strong> - 选择您的具体段位（1到5级）</li>
+                            <li><strong>指定位置</strong> - 选择您擅长的位置（坦克、C位、奶妈或任意）</li>
+                            <li><strong>目标竞逐点</strong> - 选择您的目标点数，4000点为"打满"状态</li>
+                            <li><strong>当前竞逐点</strong> - 输入您当前的竞逐点数值</li>
+                            <li><strong>转化率</strong> - 设置您的竞逐点转化率（默认为30%）</li>
+                            <li><strong>自动截图</strong> - 勾选此选项将在计算完成后自动截图保存结果</li>
+                            <li>点击<strong>计算客单价</strong>按钮获取计算结果</li>
+                            <li>如需重新开始，点击<strong>重置</strong>按钮清除所有输入</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="mobile-tip">提示：计算结果后将自动滚动到结果区域</p>
+            
+            <footer>
+                <p>© 2023 竞逐点计算器 | 本工具仅用于计算参考 | 部署于Gitee Pages</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue
+        
+        createApp({
+            setup() {
+                // 等级数据
+                const rankLevels = ref(["青铜", "白银", "黄金", "白金", "钻石", "大师"]);
+                const tiers = ref([1, 2, 3, 4, 5]);
+                
+                // 位置数据
+                const positions = ref([
+                    { name: "任意", class: "any" },
+                    { name: "坦克", class: "tank" },
+                    { name: "C位", class: "dps" },
+                    { name: "奶妈", class: "healer" }
+                ]);
+                
+                // 目标竞逐点选项
+                const targetPointsOptions = ref([
+                    { label: "打满 (4000点)", value: 4000 },
+                    { label: "3000点", value: 3000 },
+                    { label: "2000点", value: 2000 },
+                    { label: "1000点", value: 1000 }
+                ]);
+                
+                // 表单数据
+                const currentRank = ref(0);
+                const currentTier = ref(3);
+                const position = ref(0);
+                const currentPoints = ref(0);
+                const targetPoints = ref(4000);
+                const conversionRate = ref(30);
+                const screenshot = ref(true);
+                
+                // 计算结果
+                const result = ref(null);
+                const isHighlighted = ref(false);
+                const isLoading = ref(false);
+                
+                // 获取目标竞逐点标签
+                const getTargetLabel = (value) => {
+                    const option = targetPointsOptions.value.find(opt => opt.value === value);
+                    return option ? option.label.split(' ')[0] : value + '点';
+                };
+                
+                // 滚动到结果区域
+                const scrollToResult = () => {
+                    const resultSection = document.querySelector('.result-section');
+                    if (resultSection) {
+                        resultSection.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start'
+                        });
+                        
+                        // 高亮结果卡片
+                        isHighlighted.value = true;
+                        setTimeout(() => {
+                            isHighlighted.value = false;
+                        }, 1500);
+                    }
+                };
+                
+                // 计算客单价
+                const calculate = () => {
+                    isLoading.value = true;
+                    
+                    // 模拟计算延迟
+                    setTimeout(() => {
+                        const pointsDiff = targetPoints.value - currentPoints.value;
+                        
+                        if (pointsDiff <= 0) {
+                            alert("目标竞逐点必须大于当前竞逐点");
+                            isLoading.value = false;
+                            return;
+                        }
+                        
+                        if (conversionRate.value <= 0 || conversionRate.value > 100) {
+                            alert("转化率必须在1%到100%之间");
+                            isLoading.value = false;
+                            return;
+                        }
+                        
+                        // 计算公式：所需金额 = (竞逐点差值 / 转化率) * 100
+                        const requiredAmount = (pointsDiff / (conversionRate.value / 100));
+                        
+                        // 根据位置应用系数
+                        const positionCoefficient = position.value === 0 ? 1 : 1.1; // 非任意位置增加10%难度
+                        
+                        result.value = requiredAmount * positionCoefficient;
+                        
+                        // 移动端键盘收起后再滚动
+                        setTimeout(() => {
+                            scrollToResult();
+                        }, 300);
+                        
+                        // 模拟截图功能
+                        if (screenshot.value) {
+                            setTimeout(() => {
+                                alert("截图已保存到相册！");
+                            }, 1000);
+                        }
+                        
+                        isLoading.value = false;
+                    }, 800);
+                };
+                
+                // 重置表单
+                const reset = () => {
+                    currentRank.value = 0;
+                    currentTier.value = 3;
+                    position.value = 0;
+                    currentPoints.value = 0;
+                    targetPoints.value = 4000;
+                    conversionRate.value = 30;
+                    screenshot.value = true;
+                    result.value = null;
+                };
+                
+                return {
+                    rankLevels,
+                    tiers,
+                    positions,
+                    targetPointsOptions,
+                    currentRank,
+                    currentTier,
+                    position,
+                    currentPoints,
+                    targetPoints,
+                    conversionRate,
+                    screenshot,
+                    result,
+                    isHighlighted,
+                    isLoading,
+                    calculate,
+                    reset,
+                    getTargetLabel
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
